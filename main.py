@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import base64, errno, os, socket, sys, select, struct, threading, six
+import base64, errno, os, socket, sys, select, struct, threading, six, inspect
 DEBUG = False
 #def DEBUG(foo): print foo
 
@@ -767,6 +767,8 @@ class socksocket(socket.socket):
 
     def sendall(self, *args, **kwargs):
         if self.__negotiating:
+            print('caller name:', inspect.stack()[1][3])
+            print("Start--- ",args[0]," ---End")
             self.__buffer += args[0]
             self.__negotiatehttpproxy()
         else:
