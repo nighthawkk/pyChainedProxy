@@ -1,18 +1,19 @@
 import urlfetch
 import socket
-import requests
 import pyChainedProxy as socks #import pyChainedProxy
 
 # Enable debugging
 def DEBUG(msg):
   print (msg)
 
-socks.DEBUG = DEBUG
+#socks.DEBUG = DEBUG
+
+
 print ("Hell:  ",urlfetch.get('http://ip-api.com/json').content)   
 # Configure a default chain
 chain = [
-  'tor://localhost:9050/', # First hop is Tor,
-  'http://user:pass@proxy.example.com/' # ...and then auth to an HTTP proxy
+  'socks5://localhost:9050/', # First hop is Tor,
+  'http://user1:pass@example.com/' # ...and then auth to an HTTP proxy
 ]
 socks.setdefaultproxy() # Clear the default chain
 #adding hops with proxies
@@ -21,7 +22,6 @@ for hop in chain:
 
 #wrap a single module   
 #socks.wrapmodule(urlfetch)   
-res = urlfetch.get('http://ip-api.com/json')
 
 # Configure alternate routes (No proxy for localhost)
 socks.setproxy('localhost', socks.PROXY_TYPE_NONE)
@@ -35,4 +35,5 @@ socks.setproxy('127.0.0.1', socks.PROXY_TYPE_NONE)
 rawsocket = socket.socket
 socket.socket = socks.socksocket
 # Everything will be proxied!
+
 print ("Hell:  ",urlfetch.get('http://ip-api.com/json').content)

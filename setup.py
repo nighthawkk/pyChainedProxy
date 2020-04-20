@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
      name='pyChainedProxy',  
-     version='0.2',
+     version='1.1',
      author="Aman Kumar",
      author_email="akdapunk@gmail.com",
      description="A python module for Chaining of Proxies.",
@@ -17,7 +17,12 @@ setuptools.setup(
          'console_scripts': [
              'pyChainedProxy = pyChainedProxy:Main'
          ]
-     }
+     },
+    classifiers=[
+        "Programming Language :: Python :: 3.8",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+    ],
 
      
 

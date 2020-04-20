@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: pyChainedProxy
-Version: 0.2
+Version: 1.1
 Summary: A python module for Chaining of Proxies.
 Home-page: https://github.com/nighthawkk/pyChainedProxy
 Author: Aman Kumar
@@ -16,6 +16,12 @@ Description: # pyChainedProxy #
         Client <--> Proxy(1) <--> Proxy(2) <--> ... <--> Proxy(n) <--> Web Server
         
         Proxies can be Http, Socks4, Socks5, etc. 
+        
+        ## Install ##
+        
+        ```
+        pip install pyChainedProxy
+        ```
         
         -------------------------------------------------------------------------------
         # Original README #
@@ -225,4 +231,7 @@ Description: # pyChainedProxy #
         </pre>
         
 Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3.8
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
 Description-Content-Type: text/markdown

@@ -375,7 +375,7 @@ def parseproxy(arg):
       while len(args) <= P_CERTS:
         args.append((len(args) == P_RDNS) and True or None)
       args[P_CERTS] = (len(names) > 1) and names[1:] or names
-
+      
     return args
 
 def addproxy(dest, proxytype=None, addr=None, port=None, rdns=True,
@@ -515,8 +515,10 @@ class socksocket(socket.socket):
     def makefile(self, mode='r', bufsize=-1):
         self.__makefile_refs += 1
         if six.PY2:
+            print("Python 2")
             return socket._fileobject(self, mode, bufsize, close=True)
         else:
+            print("Python 3")
             return socket.SocketIO(self, mode)
 
     def addproxy(self, proxytype=None, addr=None, port=None, rdns=True, username=None, password=None, certnames=None):
@@ -714,7 +716,11 @@ class socksocket(socket.socket):
     def __getproxyauthheader(self, proxy):
         if proxy[P_USER] and proxy[P_PASS]:
           auth = proxy[P_USER] + ":" + proxy[P_PASS]
-          return "Proxy-Authorization: Basic %s\r\n" % base64.b64encode(auth)
+          if six.PY2:
+              return "Proxy-Authorization: Basic %s\r\n" % base64.b64encode(auth)
+          else:
+              return "Proxy-Authorization: Basic %s\r\n" % base64.b64encode(auth.encode("utf-8")).decode('utf-8')
+
         else:
           return ""
 
@@ -766,10 +772,12 @@ class socksocket(socket.socket):
             return self.__sock.send(*args, **kwargs)
 
     def sendall(self, *args, **kwargs):
-        if self.__negotiating:
-            print('caller name:', inspect.stack()[1][3])
-            print("Start--- ",args[0]," ---End")
-            self.__buffer += args[0]
+        if self.__negotiating:            
+            if (isinstance(args[0],int)): 
+                #self.__buffer += bytes([args[0]])
+                print("int")
+            else:
+                self.__buffer += str(args[0] )      
             self.__negotiatehttpproxy()
         else:
             return self.__sock.sendall(*args, **kwargs)
@@ -792,6 +800,7 @@ class socksocket(socket.socket):
         Negotiates an HTTP request through an HTTP proxy server.
         """
         buf = self.__buffer
+        buf = buf.replace("b'", "").replace("\\r","\r").replace("\\n","\n")
         host, port, proxy = self.__negotiating
 
         # If our buffer is tiny, wait for data.
@@ -807,9 +816,9 @@ class socksocket(socket.socket):
             return
 
         # Have we got the end of the headers?
-        if buf.find('\r\n\r\n'.encode()) != -1:
+        if buf.find('\r\n\r\n') != -1:
             CRLF = '\r\n'
-        elif buf.find('\n\n'.encode()) != -1:
+        elif buf.find('\n\n') != -1:
             CRLF = '\n'
         else:
             # Nope
@@ -840,11 +849,12 @@ class socksocket(socket.socket):
             addr = socket.gethostbyname(destaddr)
         else:
             addr = destaddr
-        self.__sock.sendall(("CONNECT "
+        ss = ("CONNECT "
                              + addr + ":" + str(destport) + " HTTP/1.1\r\n"
                              + self.__getproxyauthheader(proxy)
                              + "Host: " + destaddr + "\r\n\r\n"
-                             ).encode())
+                             ).encode()
+        self.__sock.sendall(ss)
         # We read the response until we get "\r\n\r\n" or "\n\n"
         resp = self.__recvall(1)
         while (resp.find("\r\n\r\n".encode()) == -1 and
