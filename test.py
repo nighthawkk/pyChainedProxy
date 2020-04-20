@@ -1,7 +1,7 @@
 import urlfetch
 import socket
 import requests
-import main as socks #import pyChainedProxy
+import pyChainedProxy as socks #import pyChainedProxy
 
 # Enable debugging
 def DEBUG(msg):

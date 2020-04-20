@@ -9,6 +9,12 @@ Client <--> Proxy(1) <--> Proxy(2) <--> ... <--> Proxy(n) <--> Web Server
 
 Proxies can be Http, Socks4, Socks5, etc. 
 
+## Install ##
+
+```
+pip install pyChainedProxy
+```
+
 -------------------------------------------------------------------------------
 # Original README #
 
