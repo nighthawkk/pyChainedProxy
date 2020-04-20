@@ -1024,90 +1024,12 @@ def wrapmodule(module):
     """wrapmodule(module)
     Attempts to replace a module's socket library with a SOCKS socket.
     This will only work on modules that import socket directly into the
-    namespace; most of the Python Standard Library falls into this category.
+    namespace.
     """
     module.socket.socket = socksocket
     module.socket.create_connection = sockcreateconn
     if DEBUG: DEBUG('Wrapped: %s' % module.__name__)
 
-
-## Netcat-like proxy-chaining tools follow ##
-
-def netcat(s, i, o, keep_open=''):
-    if hasattr(o, 'buffer'): o = o.buffer
-    try:
-        in_fileno = i.fileno()
-        isel = [s, i]
-        obuf, sbuf, oselo, osels = [], [], [], []
-        while isel:
-            in_r, out_r, err_r = select.select(isel, oselo+osels, isel, 1000)
-
-#           print 'In:%s Out:%s Err:%s' % (in_r, out_r, err_r)
-            if s in in_r:
-                obuf.append(s.recv(4096))
-                oselo = [o]
-                if len(obuf[-1]) == 0:
-                    if DEBUG: DEBUG('EOF(s, in)')
-                    isel.remove(s)
-
-            if o in out_r:
-                o.write(obuf[0])
-                if len(obuf) == 1:
-                    if len(obuf[0]) == 0:
-                        if DEBUG: DEBUG('CLOSE(o)')
-                        o.close()
-                        if i in isel and 'i' not in keep_open:
-                            isel.remove(i)
-                            i.close()
-                    else:
-                        o.flush()
-                    obuf, oselo = [], []
-                else:
-                    obuf.pop(0)
-
-            if i in in_r:
-                sbuf.append(os.read(in_fileno, 4096))
-                osels = [s]
-                if len(sbuf[-1]) == 0:
-                    if DEBUG: DEBUG('EOF(i)')
-                    isel.remove(i)
-
-            if s in out_r:
-                s.send(sbuf[0])
-                if len(sbuf) == 1:
-                    if len(sbuf[0]) == 0:
-                        if s in isel and 's' not in keep_open:
-                            if DEBUG: DEBUG('CLOSE(s)')
-                            isel.remove(s)
-                            s.close()
-                        else:
-                            if DEBUG: DEBUG('SHUTDOWN(s, WR)')
-                            s.shutdown(socket.SHUT_WR)
-                    sbuf, osels = [], []
-                else:
-                    sbuf.pop(0)
-
-        for data in sbuf: s.sendall(data)
-        for data in obuf: o.write(data)
-
-    except:
-        if DEBUG: DEBUG("Disconnected: %s" % (sys.exc_info(), ))
-
-    i.close()
-    s.close()
-    o.close()
-
-def __proxy_connect_netcat(hostname, port, chain, keep_open):
-    try:
-        s = socksocket(socket.AF_INET, socket.SOCK_STREAM)
-        for proxy in chain:
-            s.addproxy(*proxy)
-        s.connect((hostname, port))
-    except:
-        sys.stderr.write('Error: %s\n' % (sys.exc_info(), ))
-        return False
-    netcat(s, sys.stdin, sys.stdout, keep_open)
-    return True
 
 def __make_proxy_chain(args):
     chain = []
@@ -1119,40 +1041,15 @@ def DebugPrint(text):
   print(text)
 
 def Main():
-    keep_open = 's'
     try:
-        args = sys.argv[1:]
-        if '--wait' in args:
-            keep_open = 'si'
-            args.remove('--wait')
-        if '--nowait' in args:
-            keep_open = ''
-            args.remove('--nowait')
+        usesystemdefaults()
         if '--debug' in args:
             global DEBUG
             DEBUG = DebugPrint
-            args.remove('--debug')
-        for arg in ('--nopyopenssl', '--nossl'):
-            while arg in args:
-                args.remove(arg)
-
-        usesystemdefaults()
-
-        dest_host, dest_port = args.pop().split(':', 1)
-        dest_port = int(dest_port)
-        chain = __make_proxy_chain(args)
+            args.remove('--debug')        
     except:
         DebugPrint('Error: %s' % (sys.exc_info(), ))
-        sys.stderr.write(('Usage: python -m sockschain '
-                          '[<proto:proxy:port> [<proto:proxy:port> ...]] '
-                          '<host:port>\n'))
         sys.exit(1)
-
-    try:
-        if not __proxy_connect_netcat(dest_host, dest_port, chain, keep_open):
-            sys.exit(2)
-    except KeyboardInterrupt:
-        sys.exit(0)
 
 if __name__ == "__main__":
     Main()
