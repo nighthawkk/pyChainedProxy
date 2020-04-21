@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
      name='pyChainedProxy',  
-     version='1.1',
+     version='1.2',
      author="Aman Kumar",
      author_email="akdapunk@gmail.com",
      description="A python module for Chaining of Proxies.",
