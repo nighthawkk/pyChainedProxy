@@ -3,8 +3,6 @@
 This is a modified version of socksipy module, which supports chaining of
 proxy servers and various modes of TLS/SSL encryption.
 
-https://pypi.org/project/pyChainedProxy/
-
 Chaining of Proxy 
 ===========================
 Client <--> Proxy(1) <--> Proxy(2) <--> ... <--> Proxy(n) <--> Web Server
