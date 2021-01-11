@@ -252,18 +252,4 @@ For example:
 >>> urllib.urlopen("http://www.sourceforge.net/")
 
 
-PROBLEMS
----------
-
-If you have any problems using this module, please first refer to the BUGS file
-(containing current bugs and issues). If your problem is not mentioned you may
-contact the author at the following E-Mail address:
-
-negativeiq@users.sourceforge.net
-
-Please allow some time for your question to be received and handled.
-
-
-Dan-Haim,
-Author.
 </pre>
