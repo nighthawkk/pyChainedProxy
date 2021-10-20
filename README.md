@@ -59,7 +59,8 @@ socket.socket = socks.socksocket
 
 print ("Check IP After proxyfying:  ",urlfetch.get('http://ip-api.com/json').content)
 ```
-
+## Example ##
+You can edit and use `test.py` according to your config.
 
 -------------------------------------------------------------------------------
 # Original README #
